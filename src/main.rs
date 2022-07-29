@@ -1,12 +1,45 @@
 use std::io;
 
 fn main() {
-    let secret = "hei";
+    // Initialize game variables
+    let mut lives = 5;          // No. of allowed errors
+    let secret = "hei";         // Word to guess
+    let mut mask = Vec::new();  // Maps correct guesses to secret
 
+    // Start with no correct guesses
+    for _char in secret.chars() {
+        mask.push(false);
+    }
+
+    // Game loop
     loop {
 
         let mut guess = String::new();
+        let mut out = String::new();
+
+        // Create string to represent correct guesses
+        mask.iter().enumerate().for_each(|(i, show)| {
+            out.push(
+                if *show {
+                    match secret.chars().nth(i) {
+                        Some(c) => { c },
+                        None => {
+                            println!("Uh oh!");
+                            '_'
+                        }
+                    }
+                } else {
+                    '_'
+                }
+            );
+        });
+
+        // Show info and prompt
+        println!("You have {} lives", lives);
+        println!("The word: {}", out);
         println!("Input guess >>>");
+
+        // Read and parse guess
         io::stdin()
             .read_line(&mut guess)
             .expect("Failed to read line.");
@@ -14,36 +47,33 @@ fn main() {
         let guess: char = match guess.trim().chars().nth(0) {
             Some(c) => { c }
             None => {
-                println!("Uh Oh");
+                println!("Failed to parse guess. Input a letter.");
                 continue;
-            }
+                }
         };
-        println!("Your guess is {:?}", guess);
 
-        let i = match secret.find(guess) {
-            Some(n) => {
-                println!("Correct at index {n}");
-                n
+        // Update mask and feedback if guess was correct
+        match secret.find(guess) {
+            Some(i) => {
+                println!("{} is correct.", guess);
+                mask[i] = true;
             },
             None => {
-                println!("Incorrect.");
-                continue;
+                println!("{} is incorrect", guess);
+                lives -= 1;
             }
         };
-        println!("{i}");
-        
 
+        // Win once all letters are correctly guessed
+        if mask.iter().all(|x| *x) {
+            println!("You win!");
+            break;
+        }
 
-
-        // Create secret word
-        //
-        // print secret word with revealed chars
-        // 
-        // read user guess
-        //
-        // check if guess in secret
-        //
-        // if yes: uncover all chars where guess in secret
-        // if no: decrement lives
+        // Lose when player runs out of lives
+        if lives == 0 {
+            println!("You lose!");
+            break;
+        }
     }
 }
