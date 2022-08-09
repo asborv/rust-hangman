@@ -3,7 +3,7 @@ use std::io;
 fn main() {
     // Initialize game variables
     let mut lives = 5;          // No. of allowed errors
-    let secret = "hei";         // Word to guess
+    let secret = "heei";         // Word to guess
     let mut mask = Vec::new();  // Maps correct guesses to secret
 
     // Start with no correct guesses
@@ -52,17 +52,22 @@ fn main() {
                 }
         };
 
-        // Update mask and feedback if guess was correct
-        match secret.find(guess) {
-            Some(i) => {
-                println!("{} is correct.", guess);
-                mask[i] = true;
-            },
-            None => {
-                println!("{} is incorrect", guess);
-                lives -= 1;
-            }
-        };
+        // Find all guess occurrences in secret
+        let correct_indices: Vec<_> = secret.match_indices(guess)
+            .map(|(i, _)| i)
+            .collect();
+
+        // Decrement lives if incorrecct and prompt user
+        if correct_indices.len() == 0 {
+            println!("{} is incorrect.", guess);
+            lives -= 1;
+        } else {
+            println!("{} is collect.", guess);
+        }
+
+        // Update mask accoring to correct indices
+        correct_indices.iter()
+            .for_each(|i| mask[*i] = true);
 
         // Win once all letters are correctly guessed
         if mask.iter().all(|x| *x) {
